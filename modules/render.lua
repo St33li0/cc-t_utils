@@ -59,11 +59,6 @@ local function display_render()
 end
 
 local module = {}
-module._canRender = canRender
-module._termWidth = termWidth
-module._termHeight = termHeight
-module._buffer = buffer
-module._render = render
 module.queue = queue_buffer
 module.update = update_render
 module.display = display_render
