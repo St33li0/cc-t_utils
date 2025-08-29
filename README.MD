@@ -21,7 +21,3 @@ To make programs in a custom directory (like `/bin`) executable from the CC:Twea
 3. **Save and Restart**
 
     Save your changes and restart the computer or reload the shell. Now, any program placed in `/bin` can be run directly from the shell.
-
-## Example
-
-If you have a program called `/bin/hello.lua`, you can run it by typing:
