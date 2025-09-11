@@ -13,23 +13,22 @@ local force = args.options.force or false
 
 local urlsplit = {}
 for part in args.options.url:gmatch("[%w%.%-]+") do
-    print(part)
     table.insert(urlsplit, part)
 end
 
 if urlsplit[2] == "github.com" then -- Handle GitHub URLs to convert to raw.githubusercontent.com
     urlsplit[2] = "raw.githubusercontent.com"
-    urlsplit[6] = "refs/heads"
+    urlsplit[5] = "refs/heads"
 end
 
-local raw = table.concat(urlsplit, "/") -- Rejoin URL parts
+local raw = table.concat(urlsplit, "/", 2) -- Rejoin URL parts
+raw = "https://"..raw
 if http.checkURL(raw) then args.options.url = raw end -- Check if the modified URL is valid, if so use it instead
 raw,urlsplit = nil,nil -- Indicate for garbage collection
--- Fetch File
---local http = require("http")
 
-local response, _r = http.checkURL(args.options.url) and http.get(args.options.url) or false
-if not response then error("Failed to fetch URL: ".._r) end
+-- Fetch File
+local response = http.checkURL(args.options.url) and http.get(args.options.url) or false
+if not response then error("Failed to fetch URL: "..args.options.url) end
 if response.getResponseCode() ~= 200 then error("Failed to fetch URL: HTTP "..response.getResponseCode()) end
 -- Read Content
 local content = response.readAll()
