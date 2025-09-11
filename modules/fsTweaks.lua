@@ -3,7 +3,7 @@ if not _G.patched then _G.patched = {original = {}, patched = {}} end
 _G.patched.original["fs"] = fs -- Store original fs module
 
 
-fsTweaks = fs
+local fsTweaks = fs
 fsTweaks.semver = "0.1.0" -- https://semver.org/
 --[[
     Load FS Tweaks Functions into Environment
