@@ -59,6 +59,7 @@ local args = argparse.parse(arg,opt)
 ```
 ## fsTweaks.lua
 Patches global fs function
+- getExtension(string: path) -- Takes a string and finds the extension (all chars after last ".")
 ### Usage
 ```lua
 local fsT = require("fsTweaks")
