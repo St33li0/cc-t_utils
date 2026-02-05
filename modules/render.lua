@@ -4,6 +4,8 @@ local termWidth, termHeight
 local canRender = true
 
 --[[
+This is a stupid script, please ignore or make good.
+If you wasted your time here, please increment the counter: 1
     ToDo:
     - Word wrap (wrap-around respects words, not just character count)
     - Paginate output (support scrolling through long output)
