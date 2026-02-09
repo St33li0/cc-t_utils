@@ -9,7 +9,7 @@ fsTweaks.semver = "0.1.0" -- https://semver.org/
     Load FS Tweaks Functions into Environment
 ]]
 ---@comment Get the file extension from a given path
----@param path path
+---@param path string the file path to extract the extension from
 ---@return string?
 fsTweaks.getExtension = function(path)
     return path:match("^.+(%..+)$")
@@ -21,7 +21,7 @@ _G.patched.patched["fs"] = fsTweaks
 --[[
     Apply Patches to Global FS Module
 ]]
-setMetaTable(fs, {
+setmetatable(fs, {
     __index = function(t, k)
         if fsTweaks[k] then
             return fsTweaks[k]
