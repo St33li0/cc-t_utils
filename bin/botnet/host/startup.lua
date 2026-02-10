@@ -78,57 +78,6 @@ if not fs.exists("botnet/config.json") then
     cf.write(textutils.serializeJSON(config))
     cf.close()
     print("Configuration saved.")
-        -- local strbuf = ""
-        -- local selected = nil
-        -- local a = coroutine.create(
-        --     function()
-        --         while true do
-        --             local event, arg1, arg2 = os.pullEvent("key")
-        --             if event == "key" and arg1 == keys.enter then
-        --                 if selected == nil then selected = strbuf; strbuf = "" end
-        --                 if selected ~= nil then
-        --                     config[selected] = strbuf
-        --                     selected = nil
-        --                     strbuf = ""
-        --                 end
-        --             elseif event == "key" and arg1 == keys.backspace then
-        --                 strbuf = strbuf:sub(1, -2)
-        --             else
-        --                 strbuf = strbuf .. keys.getName(arg1)
-        --             end
-        --             os.sleep(0.1)
-        --         end
-        --     end
-        -- )
-        -- local b = coroutine.create(
-        --     function()
-        --         while true do
-        --             term.clear()
-        --             term.setCursorPos(1, (ty-5)-#config)
-        --             print("Hostname: "..config.hostname)
-        --             print("Protocol: "..config.protocol)
-        --             print("Wireless Modem: "..(config.wireless_modem and "true" or "false"))
-        --             print("Server Port: "..config.server_port)
-        --             print("Client Port: "..config.client_port)
-        --             print("Save Interval: "..config.save_interval)
-        --             print("Botnet Interval: "..config.botnet_interval)
-        --             print("API Update Interval: "..config.api_update_interval)
-        --             term.setCursorPos(1, ty)
-        --             term.clearLine()
-        --             term.write("Input: " .. strbuf)
-        --             os.sleep(0.1)
-        --         end
-        --     end
-        -- )
-        -- while not fin do
-        --     if coroutine.status(a) == "dead" then
-        --         fin = true
-        --     end
-        --     if coroutine.status(b) == "dead" then
-        --         fin = true
-        --     end
-        --     sleep(0.1)
-        -- end
     print("Rebooting to apply changes...")
     os.reboot()
 else
