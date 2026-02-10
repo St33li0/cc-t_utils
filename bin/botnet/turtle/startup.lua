@@ -7,6 +7,7 @@ if not fs.exists("botnet/config.json") then
         error("Disk drive not found. Please insert a disk drive to continue.")
     end
     fs.copy("disk/turtle", "botnet")
+    fs.copy("disk/shared", "botnet")
     shell.run("set shell.allow_disk_startup false")
     shell.setPath(shell.path()..":botnet")
     print("Choose a name for your botnet turtle: ")
