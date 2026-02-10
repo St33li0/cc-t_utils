@@ -28,10 +28,16 @@ end
 
 function screenBuffer:add(text)
     table.insert(self.lines, function() write(text.."\n" or "\n") end)
+    if #self.lines > self.ty - 2 then
+        table.remove(self.lines, 1)
+    end
 end
 
 function screenBuffer:addCentered(text)
     table.insert(self.lines, function() centeredPrint(self.tx,text or "") end)
+    if #self.lines > self.ty - 2 then
+        table.remove(self.lines, 1)
+    end
 end
 
 function screenBuffer:clear()
@@ -43,6 +49,10 @@ function screenBuffer:setTitle(title)
     if title ~= "" then
         self.titleBar = title
     end
+end
+
+function screenBuffer:getTitle()
+    return self.titleBar
 end
 
 return screenBuffer
