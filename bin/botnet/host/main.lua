@@ -36,14 +36,14 @@ if not config.User.HasChosenModem then
         term.setCursorPos(1,ty)
         local choice = read()
         if choice ~= "none" and choice ~= 0 then
-                config["wireless_modem"] = modems[tonumber(choice)]
+                config["wireless_modem"] = peripheral.getName(modems[tonumber(choice)])
                 config.User.HasChosenModem = true
         end
     elseif #modems == 1 then
         if modems[1].isWireless() then
-            config["wireless_modem"] = modems[1]
+            config["wireless_modem"] = peripheral.getName(modems[1])
             config.User.HasChosenModem = true
-            screenBuffer:add("Automatically selected modem: " .. peripheral.getName(config["wireless_modem"]))
+            screenBuffer:add("Automatically selected modem: " .. config["wireless_modem"])
             screenBuffer:draw()
         else
             screenBuffer:add("No wireless modems found. Please connect a wireless modem and try again.")
@@ -58,16 +58,24 @@ if not config.User.HasChosenModem then
 end
 screenBuffer:clear()
 
+screenBuffer:addCentered("Initializing Botnet Network...\n")
+screenBuffer:draw()
+
+local drone = require("models.drone")
+local bots = {} -- Table to store bot information (ID, status, last seen, etc.)
+
+screenBuffer:clear()
+
 screenBuffer:addCentered("Starting Botnet Host...\n")
 screenBuffer:draw()
 
-rednet.open(peripheral.getName(config["wireless_modem"]))
+rednet.open(config["wireless_modem"])
 rednet.host(config.protocol,config.hostname)
 
 screenBuffer:clear()
 screenBuffer:addCentered("Botnet Host Running\n")
 for k,v in pairs(config) do
-    if type(k) == "string" and type(v) ~= "table" then
+    if type(k) == "string" and type(v) ~= "table" and type(v) ~= "function" then
         screenBuffer:add(k .. "  :  " .. v)
     end
 end
@@ -79,7 +87,7 @@ local function handleMessages()
     while true do
         local senderId, message, protocol = rednet.receive(config.protocol)
         if protocol == config.protocol then
-            screenBuffer:add("Received message from " .. senderId .. ": " .. message)
+            screenBuffer:add("Received message from " .. senderId .. ": " .. ((message.request or message.response) or ""))
             screenBuffer:draw()
             -- Handle message (e.g. add to command queue, update bot status, etc.)
         end
@@ -89,11 +97,12 @@ end
 --- Periodically save configuration and botnet state
 local function saveState()
     while true do
-        local configFile = fs.open("botnet/config.json", "w")
-        configFile.write(textutils.serializeJSON(config))
-        configFile.close()
-        -- Save botnet state (e.g. list of connected bots, command queue, etc
-        sleep(config.save_interval)
+        local cf = fs.open("botnet/config.json", "w")
+        cf.write(textutils.serializeJSON(config))
+        cf.close()
+
+        math.randomseed(os.time()*10485)
+        sleep(config.save_interval+math.random(0, 10))
     end
 end
 
@@ -103,7 +112,16 @@ local function monitorBots()
         -- Send heartbeat request to bots
         rednet.broadcast("heartbeat", config.protocol)
         -- Wait for responses and update bot status
-        sleep(config.heartbeat_interval)
+        repeat
+            local id, message = rednet.receive(config.protocol)
+            if message and message.header == "heartbeat_response" then
+                screenBuffer:add("Received heartbeat response from bot " .. id)
+                screenBuffer:draw()
+                -- Update bot status in config or bot list
+            end
+        until not id or not message or message.header ~= "heartbeat_response"
+        math.randomseed(os.time()*10485)
+        sleep(config.botnet_interval+math.random(0, 5))
     end
 end
 
@@ -111,7 +129,22 @@ end
 local function updateAPI()
     while true do
         -- Send API updates and apply them if necessary
-        sleep(config.api_update_interval)
+        math.randomseed(os.time()*10485)
+        sleep(config.api_update_interval+math.random(50, 200))
+    end
+end
+
+local function catchTerminateAndSave()
+    while true do
+        local event, param = os.pullEventRaw("terminate")
+        if event == "terminate" then
+            screenBuffer:clear()
+            screenBuffer:addCentered("Terminating...")
+            local cf = fs.open("botnet/config.json", "w")
+            cf.write(textutils.serializeJSON(config))
+            cf.close()
+            os.shutdown()
+        end
     end
 end
 
@@ -121,6 +154,7 @@ while true do
         handleMessages,
         saveState,
         monitorBots,
-        updateAPI
+        updateAPI,
+        catchTerminateAndSave
     )
 end
