@@ -91,6 +91,7 @@ local function handleMessages()
             screenBuffer:draw()
             -- Handle message (e.g. add to command queue, update bot status, etc.)
         end
+        sleep(0)
     end
 end
 
@@ -134,27 +135,48 @@ local function updateAPI()
     end
 end
 
-local function catchTerminateAndSave()
-    while true do
-        local event = os.pullEventRaw()
-        if event == "terminate" then
-            screenBuffer:clear()
-            screenBuffer:addCentered("Terminating...")
-            local cf = fs.open("botnet/config.json", "w")
-            cf.write(textutils.serializeJSON(config))
-            cf.close()
-            os.shutdown()
-        end
-    end
+local status = {}
+local function updateStatus()
+    status.drone_count = #bots
+    status.online = rednet.isOpen()
+    sleep(5)
 end
 
+local date = os.date()
 -- Main loop
 while true do
+    screenBuffer:clear()
+    screenBuffer:setTitle("Host Online @ "..config.protocol)
+    screenBuffer:draw()
     parallel.waitForAny(
+        function()
+            local event = os.pullEventRaw()
+            if event == "terminate" then
+                print("AAAAAAAAAAAA")
+                screenBuffer:clear()
+                screenBuffer:addCentered("Terminating...")
+                screenBuffer:draw()
+                local cf = fs.open("botnet/config.json", "w")
+                cf.write(textutils.serializeJSON(config))
+                cf.close()
+                os.shutdown()
+            else sleep(0) end
+        end,
         handleMessages,
         saveState,
         monitorBots,
         updateAPI,
-        catchTerminateAndSave
+        updateStatus,
+        function()
+            date = os.date()
+            screenBuffer:clear()
+            screenBuffer:addCentered(date)
+            for i,v in ipairs(status) do
+                screenBuffer:add(i.."  :  "..v)
+            end
+            screenBuffer:draw()
+            sleep(0.2)
+        end
+        
     )
 end
