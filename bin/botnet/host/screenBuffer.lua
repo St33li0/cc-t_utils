@@ -18,12 +18,13 @@ end
 
 function screenBuffer:draw()
     term.clear()
-    term.setCursorPos(1,1)
-    centeredPrint(self.tx, self.titleBar)
     for i, drawFunc in ipairs(self.lines) do
         term.setCursorPos(1, i + 1)
         drawFunc()
     end
+    term.setCursorPos(1,1)
+    term.clearLine()
+    centeredPrint(self.tx, self.titleBar)
 end
 
 function screenBuffer:add(text)

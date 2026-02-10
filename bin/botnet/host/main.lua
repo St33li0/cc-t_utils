@@ -68,7 +68,59 @@ screenBuffer:clear()
 screenBuffer:addCentered("Botnet Host Running\n")
 for k,v in pairs(config) do
     if type(k) == "string" and type(v) ~= "table" then
-        screenBuffer:add(k .. ": " .. v)
+        screenBuffer:add(k .. "  :  " .. v)
     end
 end
 screenBuffer:draw()
+
+-- Functions
+--- Receive and handle messages from bots
+local function handleMessages()
+    while true do
+        local senderId, message, protocol = rednet.receive(config.protocol)
+        if protocol == config.protocol then
+            screenBuffer:add("Received message from " .. senderId .. ": " .. message)
+            screenBuffer:draw()
+            -- Handle message (e.g. add to command queue, update bot status, etc.)
+        end
+    end
+end
+
+--- Periodically save configuration and botnet state
+local function saveState()
+    while true do
+        local configFile = fs.open("botnet/config.json", "w")
+        configFile.write(textutils.serializeJSON(config))
+        configFile.close()
+        -- Save botnet state (e.g. list of connected bots, command queue, etc
+        sleep(config.save_interval)
+    end
+end
+
+--- Get heartbeat from bots and update their status
+local function monitorBots()
+    while true do
+        -- Send heartbeat request to bots
+        rednet.broadcast("heartbeat", config.protocol)
+        -- Wait for responses and update bot status
+        sleep(config.heartbeat_interval)
+    end
+end
+
+--- Update API
+local function updateAPI()
+    while true do
+        -- Send API updates and apply them if necessary
+        sleep(config.api_update_interval)
+    end
+end
+
+-- Main loop
+while true do
+    parallel.waitForAny(
+        handleMessages,
+        saveState,
+        monitorBots,
+        updateAPI
+    )
+end
