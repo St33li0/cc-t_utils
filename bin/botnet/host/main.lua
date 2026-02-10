@@ -136,7 +136,7 @@ end
 
 local function catchTerminateAndSave()
     while true do
-        local event, param = os.pullEventRaw("terminate")
+        local event = os.pullEventRaw()
         if event == "terminate" then
             screenBuffer:clear()
             screenBuffer:addCentered("Terminating...")
