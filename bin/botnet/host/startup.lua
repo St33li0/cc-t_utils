@@ -75,7 +75,7 @@ if not fs.exists("botnet/config.json") then
         print("Rebooting...")
         os.reboot()
     end
-    if not config["protocol"] then config["protocol"] = "botnet" end
+    if not config["protocol"] or config["protocol"] == "" then config["protocol"] = "botnet_"..tostring(config["server_port"]) end
     local cf = fs.open("botnet/config.json", "w")
     cf.write(textutils.serializeJSON(config))
     cf.close()
