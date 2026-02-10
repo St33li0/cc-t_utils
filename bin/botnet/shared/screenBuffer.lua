@@ -25,6 +25,7 @@ function screenBuffer:draw()
     term.setCursorPos(1,1)
     term.clearLine()
     centeredPrint(self.tx, self.titleBar)
+    term.setCursorPos(1,self.ty)
 end
 
 function screenBuffer:add(text)
