@@ -7,7 +7,7 @@ if not fs.exists("botnet/config.json") then
         error("Disk drive not found. Please insert a disk drive to continue.")
     end
     fs.copy("disk/host", "botnet")
-    fs.copy("disk/shared", "botnet")
+    shell.run("cp disk/shared/* botnet/")
     shell.run("set shell.allow_disk_startup false")
     shell.setPath(shell.path()..":botnet")
     print("Choose a name for your botnet host machine: ")
@@ -75,12 +75,12 @@ if not fs.exists("botnet/config.json") then
         print("Rebooting...")
         os.reboot()
     end
+    if not config["protocol"] then config["protocol"] = "botnet" end
     local cf = fs.open("botnet/config.json", "w")
     cf.write(textutils.serializeJSON(config))
     cf.close()
     print("Configuration saved.")
-    print("Rebooting to apply changes...")
-    os.reboot()
+    shell.run("botnet/main")
 else
     print("Configuration file found. Starting botnet host...")
     shell.run("botnet/main")
