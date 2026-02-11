@@ -21,7 +21,8 @@ if not fs.exists("botnet/config.json") then
         ["wireless_modem"] = {},
         ["server_port"] = 1337,
         ["client_port"] = 1338,
-        ["timeout"] = 5
+        ["timeout"] = 5,
+        ["drone"] = {}
     }
     local tx,ty = term.getSize()
     local temp = {}
