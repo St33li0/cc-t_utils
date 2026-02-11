@@ -7,9 +7,9 @@ term.setCursorPos(1,1)
 -- Load screen buffer
 local screenBuffer = require("screenBuffer").new({titleBar = "Botnet Host : "..os.getComputerID().." : "..os.getComputerLabel()})
 screenBuffer:clear()
+
 screenBuffer:addCentered("Loading Configuration...\n")
 screenBuffer:draw()
-
 -- Load configuration
 local configFile = fs.open("botnet/config.json", "r")
 local config = textutils.unserializeJSON((configFile.readAll()))
@@ -18,7 +18,7 @@ configFile.close()
 screenBuffer:clear()
 screenBuffer:addCentered("Configuring Modem...\n")
 screenBuffer:draw()
-
+-- Load Modem
 if not config.User.HasChosenModem then
     screenBuffer:add("Please choose a modem to use for the botnet.")
     screenBuffer:add("Available modems:")
@@ -60,9 +60,11 @@ screenBuffer:clear()
 
 screenBuffer:addCentered("Initializing Botnet Network...\n")
 screenBuffer:draw()
-
+-- Load botnet
 local drone = require("models.drone")
 local bots = {} -- Table to store bot information (ID, status, last seen, etc.)
+
+
 
 screenBuffer:clear()
 
