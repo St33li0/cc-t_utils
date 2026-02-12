@@ -105,12 +105,21 @@ function internal_functions.register_to_host()
     rednet.send(id,{response = "register_data",data = send_data},config.protocol)
     repeat
         id, message = rednet.receive(config.protocol)
-    until message
-    -- check for ok from host
+    until id == config.hostID and message and message.response
+    if message.reponse == "ok" and message.code == 200 then
+        drone:setStatus("No Task")
+        screenBuffer:clear()
+        screenBuffer:addCentered("Waiting for task...")
+        screenBuffer:draw()
+        return true
+    end
+    return false
 end
 
 if not config.hostID then
     local ok = internal_functions.register_to_host()
+    if ok == false then return nil end
 else -- Use init instead of register
     local ok = internal_functions.init_to_host()
+    if ok == false then return nil end
 end

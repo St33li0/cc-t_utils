@@ -64,8 +64,6 @@ screenBuffer:draw()
 local drone = require("models.drone")
 local bots = {} -- Table to store bot information (ID, status, last seen, etc.)
 
-
-
 screenBuffer:clear()
 
 screenBuffer:addCentered("Starting Botnet Host...\n")
@@ -84,21 +82,67 @@ end
 screenBuffer:draw()
 
 -- Functions
+local f = {}
+function f.getDroneByID(id)
+    for i,v in pairs(bots) do
+        if v.id == id then return bots end
+    end
+    return nil
+end
+
+function f.registerNewDrone(id)
+    if not f.getDroneByID(id) then
+        rednet.send(id,{response = "send_data",request = {
+            "clientname"
+        }},config.protocol)
+        local i,m
+        repeat
+            i,m = rednet.receive(config.protocol)
+        until i == id and m and m.response == "register_data"
+        bots[m.data.clientname] = drone.new(id)
+        bots[m.data.clientname]:getStatus()
+        bots[m.data.clientname]:getPosition()
+        bots[m.data.clientname]:getInventory()
+        bots[m.data.clientname]:getFuelLevel()
+        rednet.send(id,{response = "ok", code = 200})
+    else
+        f.initDrone(id)
+        return
+    end
+end
+
+function f.initDrone(id)
+    local d = f.getDroneByID(id)
+    if d == nil then
+        rednet.send(id,{response="unknown_drone_id"},config.protocol)
+        return
+    end
+
+end
+
 --- Receive and handle messages from bots
-local function handleMessages()
+function f.handleMessages()
     while true do
         local senderId, message, protocol = rednet.receive(config.protocol)
         if protocol == config.protocol then
-            screenBuffer:add("Received message from " .. senderId .. ": " .. ((message.request or message.response) or ""))
-            screenBuffer:draw()
             -- Handle message (e.g. add to command queue, update bot status, etc.)
+            if message.request then
+                if message.request == "register" and message.type == "drone" then
+                    -- Begin Register
+                    f.registerNewDrone(senderId)
+                end
+                if message.request == "init_drone" then
+                    -- init drone
+                    f.initDrone(senderId)
+                end
+            end
         end
         sleep(0)
     end
 end
 
 --- Periodically save configuration and botnet state
-local function saveState()
+function f.saveState()
     while true do
         local cf = fs.open("botnet/config.json", "w")
         cf.write(textutils.serializeJSON(config))
@@ -110,7 +154,7 @@ local function saveState()
 end
 
 --- Get heartbeat from bots and update their status
-local function monitorBots()
+function f.monitorBots()
     while true do
         -- Send heartbeat request to bots
         rednet.broadcast("heartbeat", config.protocol)
@@ -129,7 +173,7 @@ local function monitorBots()
 end
 
 --- Update API
-local function updateAPI()
+function f.updateAPI()
     while true do
         -- Send API updates and apply them if necessary
         math.randomseed(os.time()*10485)
@@ -138,7 +182,7 @@ local function updateAPI()
 end
 
 local status = {}
-local function updateStatus()
+function f.updateStatus()
     status.drone_count = #bots
     status.online = rednet.isOpen()
     sleep(5)
@@ -164,11 +208,11 @@ while true do
                 os.shutdown()
             else sleep(0) end
         end,
-        handleMessages,
-        saveState,
-        monitorBots,
-        updateAPI,
-        updateStatus,
+        f.handleMessages,
+        f.saveState,
+        f.monitorBots,
+        f.updateAPI,
+        f.updateStatus,
         function()
             date = os.date()
             screenBuffer:clear()
