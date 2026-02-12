@@ -1,6 +1,6 @@
 -- Get a file from the net using HTTP
 local argParse = require("argparse")
-argparse = argParse.parse
+local argparse = argParse.parse
 local args = argparse(arg,{
     url = { short = "u", has_value = true },
     output  = { short = "o", has_value = true },
